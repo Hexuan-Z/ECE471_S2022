@@ -58,8 +58,9 @@ def main(args):
        
         if args.move_type == 'manual':
             #manual mode
+            # result = [{"coordinate": pygame.mouse.get_pos(), 'move_type': "absolute"}]
             result["coordinate"] = pygame.mouse.get_pos()
-            result["move_type"] = "absolute" 
+            result["move_type"] = "absolute"
         else:
             if future is None:
                 result = noop()
@@ -79,24 +80,23 @@ def main(args):
                 info: dict containing current game information (see API guide)
         
         """
-        for res in result:
-            coordinate = res['coordinate']
-            move_type = res['move_type']
-            current_frame, level_done, game_done, info = env.step(coordinate, move_type)
+        # for res in result:
+        #     coordinate = res['coordinate']
+        #     move_type = res['move_type']
+        #     current_frame, level_done, game_done, info = env.step(coordinate, move_type)
+        #
+        #     previous_target = coordinate
+        #
+        #     if level_done or game_done:
+        #         break
 
-            # previous_target = coordinate
+        coordinate  = result['coordinate']
+        move_type   = result['move_type']
+        current_frame, level_done, game_done, info = env.step(coordinate, move_type)
 
-            if level_done or game_done:
-                break
+        previous_target = coordinate
 
         img_num += 1
-
-        # coordinate  = result['coordinate']
-        # move_type   = result['move_type']
-        # current_frame, level_done, game_done, info = env.step(coordinate, move_type)
-        #
-        # previous_target = coordinate
-        # img_num += 1
 
         if level_done:
             """ Indicates the level has finished. Any post-level cleanup your algorithm may need """

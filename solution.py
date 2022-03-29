@@ -54,6 +54,7 @@ def GetLocation(move_type, env, current_frame, previous_frame, previous_target):
                     targetX.append(center_x)
 
             if len(targetX) > 0:
+                print(targetX[0], targetY[0])
                 coordinate = (targetX[0], targetY[0])
             else:
                 coordinate = (1024//2, 768//2)
