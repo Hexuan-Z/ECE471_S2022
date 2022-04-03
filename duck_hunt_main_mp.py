@@ -3,47 +3,52 @@ import gym
 import cv2
 import numpy as np
 import pygame
-from concurrent.futures import ThreadPoolExecutor
+import multiprocessing as mp
+
+import time
 
 import ece471_duckhunt as dh 
 from ece471_duckhunt import envs
 from ece471_duckhunt.envs import duckhunt_env
 
-from solution import GetLocation 
+from solution_mp import GetLocation
 
 # Required version for the following packages
-print(f"Duck Hunt version: {dh.__version__} (=1.0.0)")
+print(f"Duck Hunt version: {dh.__version__} (=1.2.0)")
 print(f"OpenCV version: {cv2.__version__} (=4.X)")
 print(f"NumPy version: {np.__version__} (=1.19+)")
 print(f"OpenGym version: {gym.__version__} (=0.18.0)")
 
 """ If your algorithm isn't ready, it'll perform a NOOP """
 def noop():
-    return {'coordinate' : 8, 'move_type' : 'relative'}
+    return [{'coordinate' : (1024//2, 768//2), 'move_type' : 'absolute'}]
 
 """ Here is the main loop for you algorithm """
 def main(args):
   
     result = {}
     future = None
-    executor = ThreadPoolExecutor(max_workers=1)
-    previous_frame = env.render()
-    previous_target = (1024//2, 512//2)
+    executor = mp.Pool(processes=4)
+
+    ref_frame = env.render()
+    ref_targets = []
     img_num = 0
 
     while True:
+        if img_num%2 == 0:
+            ref_frame = env.render()
+            ref_targets = []
+
+        train_start = time.time()
+
         """ 
         Use the `current_frame` from either env.step of env.render
         to determine where to move the scope.
         
         current_frame : np.ndarray (width, height, 3), np.uint8, RGB
         """
-        current_frame = env.render()
-        # print(img_num)
-        if (img_num%2) == 0:
-            # the first picture has no previous frame
-            previous_frame = current_frame
-
+        current_frame = env.render() 
+        
         """
             The game needs to continue while you process the previous image so 
             we will be using multithreading (as pygame cannot be multithreaded directly).
@@ -55,21 +60,18 @@ def main(args):
             during the demo this is the setup that will be run.  Example with dummy arguments
             have been provided to you.
         """
-       
+        
         if args.move_type == 'manual':
             #manual mode
-            # result = [{"coordinate": pygame.mouse.get_pos(), 'move_type': "absolute"}]
-            result["coordinate"] = pygame.mouse.get_pos()
-            result["move_type"] = "absolute"
+            result = [{"coordinate" : pygame.mouse.get_pos(), 'move_type' : "absolute"}]
         else:
             if future is None:
                 result = noop()
-                future = executor.submit(GetLocation, args.move_type, env, current_frame, previous_frame, previous_target)
-            elif future.done():
-                result = future.result()
+                future = executor.apply_async(GetLocation, args=('absolute', env.action_space if args.move_type == "relative" else env.action_space_abs, current_frame, ref_frame, ref_targets))
+            elif future.ready():
+                result = future.get()
                 future = None
-        
-
+       
         """
         Pass the current location (and location type) you want the "gun" place.
         The action "shoot" is automatically done for you.
@@ -80,34 +82,27 @@ def main(args):
                 info: dict containing current game information (see API guide)
         
         """
-        # for res in result:
-        #     coordinate = res['coordinate']
-        #     move_type = res['move_type']
-        #     current_frame, level_done, game_done, info = env.step(coordinate, move_type)
-        #
-        #     previous_target = coordinate
-        #
-        #     if level_done or game_done:
-        #         break
-
-        coordinate  = result['coordinate']
-        move_type   = result['move_type']
-        current_frame, level_done, game_done, info = env.step(coordinate, move_type)
-
-        previous_target = coordinate
-
-        img_num += 1
+        for res in result[:10]:
+            coordinate  = res['coordinate']
+            move_type   = res['move_type']
+            ref_targets.append(coordinate)
+            current_frame, level_done, game_done, info = env.step(coordinate, move_type)
+            if level_done or game_done:
+                break
 
         if level_done:
             """ Indicates the level has finished. Any post-level cleanup your algorithm may need """
-            previous_frame = current_frame
-            previous_target = (1024//2, 512//2)
-            img_num = 0
+            executor.close()
+            executor.join()
+            executor.terminate()
+            pass
 
         if game_done:
             """ All levels have finished."""
             print(info)
             break
+
+        img_num += 1
 
 if __name__ == "__main__":
     desc="ECE 471 - Duck Hunt Challenge"
