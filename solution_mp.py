@@ -33,8 +33,8 @@ def GetLocation(move_type, action_space, current_frame, ref_frame, ref_targets):
         NOOP = 8
         """
         coordinate = action_space.sample() 
-    #Use absolute coordinates for the position of the "gun", coordinate space are defined below
-    elif move_type == "absolute":
+    # Use absolute coordinates for the position of the "gun", coordinate space are defined below
+    else:
         """
         (x,y) coordinates
         Upper left = (0,0)
@@ -56,7 +56,5 @@ def GetLocation(move_type, action_space, current_frame, ref_frame, ref_targets):
         
         if len(result) == 0:
             result.append({'coordinate': (1024//2, 768//2), 'move_type': 'relative'})
-    else:
-        pass
 
     return result
