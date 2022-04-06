@@ -3,6 +3,7 @@
 ### Note to Amanda or Declan:
 - Please use the duck_hunt_main_mp.py and solution_mp.py for testing
 - everything else keeps as default
+- This program is based on Moving Objects Detection
 
 ### VERY IMPORTANT
 If you see the gun is frozen at the beginning of game. Please restart the virtual environment.
