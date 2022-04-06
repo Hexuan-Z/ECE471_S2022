@@ -35,7 +35,7 @@ def main(args):
     img_num = 0
 
     while True:
-        if img_num % 2 == 0:
+        if img_num % 3 == 0:  # img_num % 2 == 0:
             ref_frame = env.render()
             ref_targets = []
 
