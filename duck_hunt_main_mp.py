@@ -35,9 +35,16 @@ def main(args):
     img_num = 0
 
     while True:
-        if img_num % 3 == 0:  # img_num % 2 == 0:
+        if img_num % 3 == 0 and args.move_type != 'manual':  # img_num % 2 == 0:
             ref_frame = env.render()
             ref_targets = []
+            img_num += 1
+
+            current_frame, level_done, game_done, info = env.step((1024//2, 768//2), 'absolute')
+            if level_done or game_done:
+                break
+            else:
+                continue
 
         train_start = time.time()
 
@@ -103,6 +110,7 @@ def main(args):
             break
 
         img_num += 1
+
 
 if __name__ == "__main__":
     desc="ECE 471 - Duck Hunt Challenge"
