@@ -1,5 +1,8 @@
 # Spring 2022 ECE471 Duck Hunt Project
 
+### Update
+- duck_hunt_main.py and solution.py are my old solution (Third Approach)
+
 ### Note to Amanda or Declan:
 - Please use the duck_hunt_main_mp.py and solution_mp.py for testing
 - everything else keeps as default

@@ -18,7 +18,7 @@ def GetLocation(move_type, action_space, current_frame, ref_frame, ref_targets):
     ret, tframe = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     (cnts, _) = cv2.findContours(tframe.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    print(len(cnts))
+    # print(len(cnts))
 
     result = []
     #Use relative coordinates to the current position of the "gun", defined as an integer below
@@ -45,6 +45,7 @@ def GetLocation(move_type, action_space, current_frame, ref_frame, ref_targets):
 
         if len(cnts) > 0:
             for cnt in cnts:
+                # print(len(cnt))
                 x, y, w, h = cv2.boundingRect(cnt[0])
                 target_y = x+w//2
                 target_x = y+h//2
@@ -60,3 +61,4 @@ def GetLocation(move_type, action_space, current_frame, ref_frame, ref_targets):
             result.append({'coordinate': (1024//2, 768//2), 'move_type': 'absolute'})
 
     return result
+
